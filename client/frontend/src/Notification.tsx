@@ -5,8 +5,8 @@ function Notification({ message }: { message: string }) {
   const [displayMessage, setDisplayMessage] = useState(message);
 
   useEffect(() => {
-    const show = message != null && message.length > 0;
-    setShouldShow(true);
+    const show = message != null && message.trim().length > 0;
+    setShouldShow(show);
     setDisplayMessage(message);
     if (show) {
       setTimeout(() => setShouldShow(false), 3000);

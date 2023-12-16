@@ -1,32 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import {Button, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from '@material-ui/core';
 import axios from 'axios';
-import NavBar from './NavBar';
 import CreateUserModal from './CreateUserModal';
-import Notification from './Notification';
+import { BaseProps, User } from './schema';
+import NavBar from './NavBar';
 
-type User = {
-  id: number;
-  name: string;
-  active: boolean;
-  companies: string;
-};
-
-export default function UsersPage() {
+export default function UsersPage(props : BaseProps) {
   const getUsers = async () => {
     const users = await (await axios.get('/api/users')).data;
     setUsers(users);
   };
 
-  const createUser = async (username: string) => {
+  const createUser = async (user: User) => {
     try {
       await (
-        await axios.post('/api/user', { name: username, active: true })
+        await axios.post('/api/user', user)
       ).data;
-      setNotification('Successfully created user');
+      props.setNotification('Successfully created or updated user');
     } catch (e: any) {
       console.log(e);
-      setNotification(e.message);
+      props.setNotification(e.message);
     }
   };
 
@@ -39,11 +32,18 @@ export default function UsersPage() {
   }, []);
 
   const [showUserModal, setShowUserModal] = useState(false);
-  const [notification, setNotification] = useState('Hello');
-  const handleCreateUser = async (text: string) => {
+  
+  const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
+
+  const handleCreateUser = async (user: User) => {
     setShowUserModal(false);
-    await createUser(text);
+    await createUser(user);
     await getUsers();
+  };
+
+  const handleEditUser = (u: User) => {
+    setSelectedUser(u);
+    setShowUserModal(true);
   };
 
   const handleCancelCreateUser = () => {
@@ -55,30 +55,31 @@ export default function UsersPage() {
   };
 
   return (
-    <div>
-      <Notification message={notification} />
+    <div style={{ display: 'flex', flexDirection: 'row' }}>
       <NavBar />
-      <CreateUserModal show={showUserModal} onSubmit={handleCreateUser} onCancel={handleCancelCreateUser} />
-      <div>
-        <button onClick={handleShowCreateModal}>Create User</button>
-        <table>
-          <thead>
-            <tr>
-              <td>Id</td>
-              <td>Name</td>
-              <td>Active</td>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((it) => (
-              <tr key={it.id} onClick={() => console.log('Pressed')} style={{ cursor: 'pointer' }}>
-                <td>{it.id}</td>
-                <td>{it.name}</td>
-                <td>{it.active.toString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <CreateUserModal value={selectedUser} show={showUserModal} onSubmit={handleCreateUser} onCancel={handleCancelCreateUser} setNotification={props.setNotification}/>
+        <Button variant='outlined' onClick={handleShowCreateModal}>Create User</Button>
+        <TableContainer component={Paper}>
+          <Table style={{ minWidth: 650 }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Id</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Active</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {users.map((it) => (
+                <TableRow role="checkbox" tabIndex={-1} key={it.id} onClick={() => handleEditUser(it)} style={{ cursor: 'pointer' }}>
+                  <TableCell component="th" scope="row">{it.id}</TableCell>
+                  <TableCell>{it.name}</TableCell>
+                  <TableCell>{it.active.toString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 function NavBar() {
   return (
-    <div style={{ float: 'left', width: '200px' }}>
+    <div style={{ float: 'left', width: '200px', height: '100vh'}}>
       <nav className="menu">
         <ul>
           <li>
@@ -15,6 +15,9 @@ function NavBar() {
           <li>
             <Link to="/permissions">Permissions</Link>
           </li>
+          <li>
+            <Link to="/logout">Logout</Link>
+          </li>
         </ul>
       </nav>
     </div>
@@ -22,3 +25,7 @@ function NavBar() {
 }
 
 export default NavBar;
+
+
+/*
+*/

@@ -1,0 +1,2 @@
+#!/bin/sh
+docker run -p "3306:3306"  --name permissions_db --rm --env MARIADB_ROOT_PASSWORD=root_password  --env MARIADB_DATABASE=permissions -v ./sql/:/docker-entrypoint-initdb.d/  mariadb:latest

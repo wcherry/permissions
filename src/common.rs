@@ -4,9 +4,15 @@ use diesel::{
     prelude::*,
     r2d2::{self, ConnectionManager},
 };
+use crate::config::Config;
 
 pub type DbError = Box<dyn std::error::Error + Send + Sync>;
 pub type DbPool = r2d2::Pool<ConnectionManager<MysqlConnection>>;
+
+pub struct AppState {
+    pub pool: DbPool,
+    pub config: Config,
+}
 
 // Format the response as JSON instead of the default text
 // actix_web::error::ErrorBadRequest(err)

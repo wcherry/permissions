@@ -42,15 +42,32 @@ CREATE TABLE role_permissions(
         role_id BIGINT NOT NULL,
         permission_id BIGINT NOT NULL,
     	FOREIGN KEY (role_id) REFERENCES roles(id),
-        FOREIGN KEY (permission_id) REFERENCES permissions(id)
+        FOREIGN KEY (permission_id) REFERENCES permissions(id),
         constraint unique(role_id, permission_id));
 
 CREATE TABLE user_company_permissions(
         id BIGINT PRIMARY KEY AUTO_INCREMENT,
         user_id BIGINT NOT NULL,
         company_id BIGINT NOT NULL,
-        permission_id BIGINT NOT NULL);
+        permission_id BIGINT NOT NULL,
         FOREIGN KEY (company_id) REFERENCES companies(id),
         FOREIGN KEY (permission_id) REFERENCES permissions(id));
 
-insert into permissions (name) values ('_.DUMMY._');
+
+--
+-- Security and Authentication Section
+--
+CREATE TABLE auth_users(
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(256) NOT NULL UNIQUE,
+    email_address VARCHAR(256) NOT NULL UNIQUE,
+    password VARCHAR(256) NOT NULL, --  COMMENT 'hashed password'
+    -- metadata
+    created_at timestamp DEFAULT now(),
+    updated_at timestamp DEFAULT now(),
+    created_by INTEGER NOT NULL DEFAULT 0,
+    updated_by INTEGER NOT NULL DEFAULT 0,
+    active BOOL NOT NULL DEFAULT true);
+
+
+insert into permissions (id, name) values (1, '_.DUMMY._');
