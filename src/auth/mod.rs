@@ -17,7 +17,7 @@ use serde_json::json;
 
 // use dto::RegisterUserDto;
 
-use crate::{auth::dto::{LoginRequestDto, LoginResponseDto, TokenClaims}, model::AuthUser};
+use crate::auth::dto::{LoginRequestDto, LoginResponseDto, TokenClaims};
 use crate::common::{ServiceError, AppState};
 use service::find_user;
 
@@ -121,14 +121,14 @@ async fn login_user_handler(
     let cookie = Cookie::build("token", token.to_owned())
         .path("/")
         .max_age(ActixWebDuration::new(60 * 60, 0))
-        .http_only(true)
+        // .http_only(true)
         .finish();
     user.password = "".to_string();
 
     Ok(HttpResponse::Ok().cookie(cookie).json(LoginResponseDto {
         status: String::from("success"),
         token,
-        user: AuthUser::from(user),
+        user,
     }))
 }
 
@@ -144,7 +144,7 @@ async fn login_user_handler(
     )
 )]
 #[get("/logout")]
-async fn logout_handler(_: jwt_auth::JwtMiddleware) -> Result<HttpResponse, Error> {
+async fn logout_handler(_: jwt_auth::AuthenticatedUser) -> Result<HttpResponse, Error> {
     let cookie = Cookie::build("token", "")
         .path("/")
         .max_age(ActixWebDuration::new(-1, 0))

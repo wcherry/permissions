@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {Button, Dialog, DialogTitle, DialogContent, DialogActions} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'; 
-import { BaseProps, Permission } from './schema';
+import { BaseProps, Role } from './schema';
 
 const useStyles = makeStyles((theme) => ({ 
   root: { 
@@ -16,19 +16,19 @@ const useStyles = makeStyles((theme) => ({
   } 
 })); 
 
-interface CreatePermissionModalProps extends BaseProps {
-  value : Permission | undefined;
+interface CreateRoleModalProps extends BaseProps {
+  value : Role | undefined;
   onSubmit: Function;
   onCancel?: Function;
   show: boolean;
 }
 
-export default function CreatePermissionModal({
+export default function CreateRoleModal({
   value,
   onSubmit,
   onCancel,
   show,
-}: CreatePermissionModalProps) {
+}: CreateRoleModalProps) {
   const classes = useStyles(); 
   const [name, setName] = useState('');
   const [visible, setVisible] = useState(show);
@@ -54,10 +54,10 @@ export default function CreatePermissionModal({
 
   return (
     <Dialog open={visible}>
-      <DialogTitle>Create Permission</DialogTitle>
+      <DialogTitle>Create Role</DialogTitle>
       <DialogContent dividers>
       <label>Name</label>
-      <input type="text" placeholder="Permission" onChange={handleChange} value={name} />
+      <input type="text" placeholder="Role" onChange={handleChange} value={name} />
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={handleClose}>Cancel</Button>

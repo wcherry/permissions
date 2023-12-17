@@ -1,25 +1,18 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link as NavLink } from 'react-router-dom';
+import { Link } from "@material-ui/core"; 
+import { Stack } from "@mui/system"; 
 
 function NavBar() {
   return (
     <div style={{ float: 'left', width: '200px', height: '100vh'}}>
-      <nav className="menu">
-        <ul>
-          <li>
-            <Link to="/users">Users</Link>
-          </li>
-          <li>
-            <Link to="/roles">Roles</Link>
-          </li>
-          <li>
-            <Link to="/permissions">Permissions</Link>
-          </li>
-          <li>
-            <Link to="/logout">Logout</Link>
-          </li>
-        </ul>
-      </nav>
+      <Stack spacing={1} direction="column" justifyContent="center">
+        <Link to="/users" component={NavLink}>Users</Link>
+        <Link to="/roles" component={NavLink}>Roles</Link>
+        <Link to="/permissions" component={NavLink}>Permissions</Link>
+        <Link to="/companies" component={NavLink}>Companies</Link>
+        <Link to="/logout" component={NavLink}>Logout</Link>        
+      </Stack>
     </div>
   );
 }

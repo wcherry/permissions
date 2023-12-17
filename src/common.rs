@@ -35,7 +35,7 @@ pub enum ServiceError {
     BadRequest(String),
 
     #[display(fmt = r#"{{"error":"Unauthorized"}}"#)]
-    Unauthorized,
+    _Unauthorized,
 
     #[display(fmt = r#"{{"error":"{} not Found"}}"#, _0)]
     NotFound(String),
@@ -50,7 +50,7 @@ impl ResponseError for ServiceError {
             ServiceError::BadRequest(ref _message) => HttpResponse::BadRequest()
                 .content_type("application/json")
                 .body(self.to_string()),
-            ServiceError::Unauthorized => HttpResponse::Unauthorized()
+            ServiceError::_Unauthorized => HttpResponse::Unauthorized()
                 .content_type("application/json")
                 .body(self.to_string()),
             ServiceError::NotFound(ref _message) => HttpResponse::NotFound()

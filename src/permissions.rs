@@ -81,7 +81,7 @@ fn find_permissions_for_user_and_company(
 
 // #[permissions("permissions.permissions.all.query")]
 #[get("/permissions")]
-pub async fn get_permissions(app_state: web::Data<AppState>, jwt: jwt_auth::JwtMiddleware) -> Result<HttpResponse, Error> {
+pub async fn get_permissions(app_state: web::Data<AppState>, _jwt: jwt_auth::AuthenticatedUser) -> Result<HttpResponse, Error> {
     let all_permissions = web::block(move || {
         let mut conn = app_state.pool.get()?;
         find_all_permissions(&mut conn)
@@ -96,7 +96,7 @@ pub async fn get_permissions(app_state: web::Data<AppState>, jwt: jwt_auth::JwtM
 #[get("/user/{user_id}/company/{company_id}/permissions")]
 pub async fn get_permissions_for_user_and_company(
     app_state: web::Data<AppState>, 
-    jwt: jwt_auth::JwtMiddleware,
+    _jwt: jwt_auth::AuthenticatedUser,
     path: web::Path<(i32, i32)>,
     web::Query(query): web::Query<HashMap<String, String>>,
     //web::Json(thing): web::Json<Thing> // web::Json extractor for json body.
@@ -135,7 +135,7 @@ pub async fn get_permissions_for_user_and_company(
 #[get("/role/{role_id}/permissions")]
 pub async fn get_permissions_for_roles(
     app_state: web::Data<AppState>,
-    jwt: jwt_auth::JwtMiddleware,
+    _jwt: jwt_auth::AuthenticatedUser,
     path: web::Path<i32>,
     web::Query(_query): web::Query<HashMap<String, String>>,
 ) -> Result<HttpResponse, Error> {
@@ -154,7 +154,7 @@ pub async fn get_permissions_for_roles(
 #[put("/role/{role_id}/permissions")]
 pub async fn save_permissions_for_roles(
     app_state: web::Data<AppState>,
-    jwt: jwt_auth::JwtMiddleware,
+    _jwt: jwt_auth::AuthenticatedUser,
     path: web::Path<i32>,
     web::Query(_query): web::Query<HashMap<String, String>>,
     web::Json(body): web::Json<Vec<Permission>>, // web::Json extractor for json body.
@@ -164,7 +164,7 @@ pub async fn save_permissions_for_roles(
     for p in body {
         let p: RolePermission = RolePermission {
             id: None,
-            role_id: role_id,
+            role_id,
             permission_id: p.id.unwrap(),
         };
         rp.push(p);
@@ -183,7 +183,7 @@ pub async fn save_permissions_for_roles(
 #[post("/permission")]
 pub async fn create_permission(
     app_state: web::Data<AppState>,
-    jwt: jwt_auth::JwtMiddleware,
+    _jwt: jwt_auth::AuthenticatedUser,
     web::Json(body): web::Json<Permission>,
 ) -> Result<HttpResponse, Error> {
     web::block(move || {

@@ -2,13 +2,18 @@
 extern crate diesel;
 
 use actix_files::NamedFile;
-use actix_web::{web, App, HttpRequest, HttpServer, Result};
+use actix_web::{web, App, HttpRequest, HttpServer, Result, http::header, get, Responder};
 use diesel::{
     r2d2::{self, ConnectionManager},
     MysqlConnection,
 };
+use actix_web::middleware::Logger;
 use std::{io, path::PathBuf};
 use config::Config;
+use actix_cors::Cors;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+use log::info;
 
 mod common;
 mod companies;
@@ -19,6 +24,7 @@ mod users;
 mod auth;
 mod config;
 mod model;
+mod swagger;
 
 const CLIENT_PATH: &str = "./client/frontend/build/";
 
@@ -34,6 +40,11 @@ async fn index(req: HttpRequest) -> Result<NamedFile> {
     Ok(NamedFile::open(path)?)
 }
 
+#[get("/healthcheck")]
+async fn health_check(_name: web::Path<String>) -> impl Responder {
+    format!("WebServer Status: {}\nDatabase Status {}\n", "Ok", "Ok")
+}
+
 #[actix_web::main]
 async fn main() -> io::Result<()> {
     dotenv::dotenv().ok();
@@ -43,7 +54,7 @@ async fn main() -> io::Result<()> {
 
     // set up database connection pool
     let conn_spec = std::env::var("DATABASE_URL").expect("DATABASE_URL");
-    println!("{}", conn_spec);
+    info!("{}", conn_spec);
     let manager = ConnectionManager::<MysqlConnection>::new(conn_spec);
     // Create connection pool
     let pool = r2d2::Pool::builder()
@@ -52,11 +63,22 @@ async fn main() -> io::Result<()> {
 
     // Start HTTP server
     HttpServer::new(move || {
+        let cors = Cors::default()
+        .allowed_origin("http://localhost:8080")
+        .allowed_methods(vec!["GET", "PUT", "POST"])
+        .allowed_headers(vec![
+            header::CONTENT_TYPE,
+            header::AUTHORIZATION,
+            header::ACCEPT,
+        ])
+        .supports_credentials();
         App::new()
             .app_data(web::Data::new(common::AppState {
                 pool: pool.clone(),
                 config: config.clone(),
             }))
+            .wrap(cors)
+            .wrap(Logger::default())
             .service(
                 web::scope("/api")
                     .service(users::get_user)
@@ -66,6 +88,7 @@ async fn main() -> io::Result<()> {
                     .service(roles::get_role)
                     .service(roles::get_all_roles)
                     .service(companies::get_companies)
+                    .service(companies::create_company)
                     .service(permissions::get_permissions_for_roles)
                     .service(permissions::save_permissions_for_roles)
                     .service(users::create_user)
@@ -73,6 +96,11 @@ async fn main() -> io::Result<()> {
                     .service(auth::login_user_handler)
                     .service(auth::logout_handler)
                     .service(permissions::create_permission)
+            )
+            .service(health_check)
+            .service(
+                SwaggerUi::new("/swagger-ui/{_:.*}")
+                    .url("/api-docs/openapi.json", swagger::ApiDoc::openapi()),
             )
             .route("/{filename:.*}", web::get().to(index))
     })

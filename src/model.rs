@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 #[derive(
     Debug, Clone, Serialize, Deserialize, Queryable, Insertable, QueryableByName, PartialEq,
@@ -36,13 +37,13 @@ pub struct Role {
 )]
 #[diesel(table_name = crate::schema::companies)]
 pub struct Company {
-    pub id: i32,
+    pub id: Option<i32>,
     pub name: String,
     pub active: bool,
 }
 
 #[derive(
-    Debug, Clone, Serialize, Deserialize, Queryable, Insertable, QueryableByName, PartialEq,
+    Debug, Clone, Serialize, Deserialize, Queryable, Insertable, QueryableByName, PartialEq, ToSchema
 )]
 #[diesel(table_name = crate::schema::auth_users)]
 pub struct AuthUser {
@@ -58,11 +59,15 @@ pub struct AuthUser {
 }
 
 #[derive(
-    Debug, Clone, Serialize, Deserialize, Queryable, Insertable, QueryableByName, PartialEq,
+    Debug, Clone, Serialize, Deserialize, Queryable, Insertable, QueryableByName, PartialEq,ToSchema,
 )]
 #[diesel(table_name = crate::schema::users)]
+/// The User object
 pub struct User {
+    /// the primary identifer for user
     pub id: Option<i32>,
+    /// the name of user
     pub name: String,
+    /// determines if the user account is active
     pub active: bool,
 }

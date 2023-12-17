@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import NavBar from './NavBar';
 import CreatePermissionModal from './CreatePermissonModal';
-import { Button } from '@material-ui/core';
+import { Button, TableContainer, TableHead, Table, TableCell, TableRow, TableBody, Paper } from '@material-ui/core';
+import { BaseProps } from './schema';
 
 type Permission = {
   id: number;
@@ -11,7 +11,7 @@ type Permission = {
   active: boolean;
 };
 
-export default function PermissionsPage() {
+export default function PermissionsPage({setNotification}: BaseProps) {
   const getPermissions = async () => {
     const permissions = await (await axios.get('/api/permissions')).data;
     setPermissions(permissions);
@@ -22,6 +22,8 @@ export default function PermissionsPage() {
   useEffect(() => {
     getPermissions();
   }, []);
+
+  const [selectedPermission, setSelectedPermission] = useState<Permission | undefined>(undefined);
 
   const createPermission = async (name: string) => {
     try {
@@ -37,11 +39,16 @@ export default function PermissionsPage() {
 
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [notification, setNotification] = useState('');
+
   const handleCreatePermission = async (text: string) => {
     setShowCreateModal(false);
     await createPermission(text);
     await getPermissions();
+  };
+  
+  const handleEdit = (p: Permission) => {
+    setSelectedPermission(p);
+    setShowCreateModal(true);
   };
 
   const handleCancelCreate = () => {
@@ -52,36 +59,33 @@ export default function PermissionsPage() {
     setShowCreateModal(true);
   };
 
-
-
-  const nav = useNavigate();
-
   return (
-    <div>
-      <NavBar />
-      <CreatePermissionModal show={showCreateModal} onSubmit={handleCreatePermission} onCancel={handleCancelCreate} />
-      <div>
-      <Button variant='outlined' onClick={handleShowCreateModal}>Create Permission</Button>
-
-        <table>
-          <thead>
-            <tr>
-              <td>Id</td>
-              <td>Name</td>
-              <td>Active</td>
-            </tr>
-          </thead>
-          <tbody>
+    <div style={{ display: 'flex', flexDirection: 'row' }}>
+    <NavBar />
+    <CreatePermissionModal value={selectedPermission} show={showCreateModal} onSubmit={handleCreatePermission} onCancel={handleCancelCreate} setNotification={setNotification}/>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div><Button variant='outlined' onClick={handleShowCreateModal}>Create Permission</Button></div>
+      <TableContainer component={Paper}>
+        <Table style={{ minWidth: 650 }}>
+          <TableHead>
+            <TableRow>
+              <TableCell>Id</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Active</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {permissions.map((it) => (
-              <tr key={it.id} onClick={() => nav(`/permission/${it.id}`)} style={{ cursor: 'pointer' }}>
-                <td>{it.id}</td>
-                <td>{it.name}</td>
-                <td>{it.active.toString()}</td>
-              </tr>
+              <TableRow role="checkbox" tabIndex={-1} key={it.id} onClick={() => handleEdit(it)} style={{ cursor: 'pointer' }}>
+                <TableCell component="th" scope="row">{it.id}</TableCell>
+                <TableCell>{it.name}</TableCell>
+                <TableCell>{it.active.toString()}</TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
+  </div>
   );
 }

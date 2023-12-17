@@ -21,7 +21,7 @@ fn find_role(conn: &mut MysqlConnection, role_id: i32) -> Result<Role, DbError> 
 
 // #[permissions("permissions.roles.all.query")]
 #[get("/roles")]
-pub async fn get_all_roles(app_state: web::Data<AppState>,jwt: jwt_auth::JwtMiddleware) -> Result<HttpResponse, Error> {
+pub async fn get_all_roles(app_state: web::Data<AppState>,_jwt: jwt_auth::AuthenticatedUser) -> Result<HttpResponse, Error> {
     let roles = web::block(move || {
         let mut conn = app_state.pool.get()?;
         find_all_roles(&mut conn)
@@ -37,7 +37,7 @@ pub async fn get_all_roles(app_state: web::Data<AppState>,jwt: jwt_auth::JwtMidd
 #[get("/role/{role_id}")]
 pub async fn get_role(
     app_state: web::Data<AppState>,
-    jwt: jwt_auth::JwtMiddleware,
+    _jwt: jwt_auth::AuthenticatedUser,
     path: web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
     let role_id = path.into_inner();

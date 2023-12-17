@@ -59,7 +59,7 @@ export default function UsersPage(props : BaseProps) {
       <NavBar />
       <div style={{ display: 'flex', flexDirection: 'column' }}>
         <CreateUserModal value={selectedUser} show={showUserModal} onSubmit={handleCreateUser} onCancel={handleCancelCreateUser} setNotification={props.setNotification}/>
-        <Button variant='outlined' onClick={handleShowCreateModal}>Create User</Button>
+        <div><Button variant='outlined' onClick={handleShowCreateModal}>Create User</Button></div>
         <TableContainer component={Paper}>
           <Table style={{ minWidth: 650 }}>
             <TableHead>

@@ -33,6 +33,7 @@ const LoginPage : React.FC<LoginPageProps> = (props) => {
                 console.log(response.data);
                 const authUser: AuthUser = response.data; // Fix: Assign response.data to authUser
                 props.setUser(authUser); // Fix: Pass authUser to setUser
+                localStorage.setItem('user', JSON.stringify(authUser));
                 })
             .catch((error) => {
                 // Handle login error

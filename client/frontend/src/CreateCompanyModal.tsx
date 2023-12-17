@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {Button, Dialog, DialogTitle, DialogContent, DialogActions} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles'; 
-import { BaseProps, Permission } from './schema';
+import { Company, BaseProps } from './schema';
 
 const useStyles = makeStyles((theme) => ({ 
   root: { 
@@ -14,21 +14,21 @@ const useStyles = makeStyles((theme) => ({
     }, 
       marginTop: "40px"
   } 
-})); 
+}));
 
-interface CreatePermissionModalProps extends BaseProps {
-  value : Permission | undefined;
+interface CreateCompanyModalProps extends BaseProps {
+  value : Company | undefined;
   onSubmit: Function;
   onCancel?: Function;
   show: boolean;
 }
 
-export default function CreatePermissionModal({
+export default function CreateCompanyModal({
   value,
   onSubmit,
   onCancel,
   show,
-}: CreatePermissionModalProps) {
+}: CreateCompanyModalProps) {
   const classes = useStyles(); 
   const [name, setName] = useState('');
   const [visible, setVisible] = useState(show);
@@ -44,7 +44,7 @@ export default function CreatePermissionModal({
 
   const handleSave = () => {
     setVisible(false);
-    onSubmit(name);
+    onSubmit({name, active: true});
   };
 
   const handleClose = () => {
@@ -54,10 +54,10 @@ export default function CreatePermissionModal({
 
   return (
     <Dialog open={visible}>
-      <DialogTitle>Create Permission</DialogTitle>
+      <DialogTitle>Create Company</DialogTitle>
       <DialogContent dividers>
       <label>Name</label>
-      <input type="text" placeholder="Permission" onChange={handleChange} value={name} />
+      <input type="text" placeholder="Company Name" onChange={handleChange} value={name} />
       </DialogContent>
       <DialogActions>
         <Button variant="contained" color="primary" onClick={handleClose}>Cancel</Button>

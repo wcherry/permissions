@@ -73,18 +73,29 @@ fn find_user_with_companies(conn: &mut MysqlConnection, user_id: i32) -> Result<
     .bind::<Integer, _>(user_id)
     .bind::<Integer, _>(user_id)
     .get_results(conn)?;
-    return Ok(UserDto {
+    Ok(UserDto {
         id: user.id.unwrap(), // TODO: Proper handling of this error that should never happen
         name: user.name,
         active: user.active,
-        companies: companies.into_iter().map(|it: Company| CompanyDto{id: it.id, name: it.name, active: it.active}).collect(),
-    });
+        companies: companies.into_iter().map(|it: Company| CompanyDto{id: it.id.unwrap(), name: it.name, active: it.active}).collect(),
+    })
 }
 
+///
+///  Gets all users
+///
+#[utoipa::path(
+    get,
+    tag = "Users",
+    path = "/users",
+    responses(
+        (status = 200, description = "Successfully got all users", body = [User])
+    )
+)]
 // #[permissions("permissions.users.all.query")]
 #[get("/users")]
-pub async fn get_users(app_state: web::Data<AppState>,jwt: jwt_auth::JwtMiddleware) -> Result<HttpResponse, Error> {
-    let auth_id = jwt.user_id;
+pub async fn get_users(app_state: web::Data<AppState>,jwt: jwt_auth::AuthenticatedUser) -> Result<HttpResponse, Error> {
+    let _auth_id = jwt.user_id;
     
     let all_users = web::block(move || {
         let mut conn = app_state.pool.get()?;
@@ -101,11 +112,22 @@ pub async fn get_users(app_state: web::Data<AppState>,jwt: jwt_auth::JwtMiddlewa
     // }
 }
 
+///
+///  Gets a user by their primary identifer
+///
+#[utoipa::path(
+    get,
+    tag = "Users",
+    path = "/user/{user_id}",
+    responses(
+        (status = 200, description = "Successfully got the user by their id", body = User)
+    )
+)]
 // #[permissions("permissions.user.query")]
 #[get("/user/{user_id}")]
 pub async fn get_user(
     app_state: web::Data<AppState>,
-    jwt: jwt_auth::JwtMiddleware,
+    _jwt: jwt_auth::AuthenticatedUser,
     path: web::Path<i32>,
 ) -> Result<HttpResponse, Error> {
     let user_id = path.into_inner();
@@ -123,7 +145,7 @@ pub async fn get_user(
 #[post("/user")]
 pub async fn create_user(
     app_state: web::Data<AppState>,
-    jwt: jwt_auth::JwtMiddleware,
+    _jwt: jwt_auth::AuthenticatedUser,
     web::Json(body): web::Json<User>,
 ) -> Result<HttpResponse, Error> {
     web::block(move || {

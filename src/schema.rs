@@ -1,6 +1,6 @@
 table! {
   companies (id) {
-    id -> Integer,
+    id -> Nullable<Integer>,
     name -> Text,
     active -> Bool,
   }

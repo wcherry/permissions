@@ -21,12 +21,12 @@ impl fmt::Display for ErrorResponse {
     }
 }
 
-pub struct JwtMiddleware {
+pub struct AuthenticatedUser {
     pub user_id: i32,
     pub is_guest: bool,
 }
 
-impl FromRequest for JwtMiddleware {
+impl FromRequest for AuthenticatedUser {
     type Error = ActixWebError;
     type Future = Ready<Result<Self, Self::Error>>;
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
@@ -43,7 +43,7 @@ impl FromRequest for JwtMiddleware {
 
         if token.is_none() {
             // if req.method() == http::Method::OPTIONS || req.method() == http::Method::GET {
-            //     return ready(Ok(JwtMiddleware {
+            //     return ready(Ok(AuthenticatedUser {
             //         user_id: GUEST_USER_ID,
             //         is_guest: true,
             //     }));
@@ -74,7 +74,7 @@ impl FromRequest for JwtMiddleware {
         let user_id = user_id.parse::<i32>().unwrap();
         req.extensions_mut().insert::<i32>(user_id);
 
-        ready(Ok(JwtMiddleware {
+        ready(Ok(AuthenticatedUser {
             user_id,
             is_guest: false,
         }))
